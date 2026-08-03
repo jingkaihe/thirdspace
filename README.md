@@ -55,21 +55,7 @@ Launch the full-screen terminal interface with:
 thirdspace tui
 ```
 
-The TUI shares saved credentials and club preferences with the CLI. Club, class-name, and trainer filters combine using AND semantics; press `/` to edit class and trainer filters or `c` to choose and persist clubs.
-
-| Key | Action |
-| --- | --- |
-| `j` / `k`, arrows | Move through classes |
-| `[` / `]` | Previous or next timetable window; change booking range on the Bookings tab |
-| `w` | Toggle a one-day or seven-day timetable |
-| `Tab` | Switch between Timetable and Bookings |
-| `/` | Set combined class and trainer filters |
-| `c` | Choose and persist default timetable clubs |
-| `Enter` | Open full class details |
-| `a` | Use the current server-provided class action |
-| `r` | Refresh the current data |
-| `?` | Show expanded help |
-| `q` | Quit |
+Press `?` to see shortcuts.
 
 The interface adapts to the terminal size and automatically selects Catppuccin Latte or Mocha for light or dark terminals.
 
@@ -106,4 +92,4 @@ All commands accept `--config PATH`. Use `thirdspace <command> --help` for comma
 
 ## License
 
-The original source code is licensed under the MIT License; see `LICENSE`. This does not grant rights to Third Space or Fisikal trademarks, services, or materials.
+The source code is licensed under the MIT License; see `LICENSE`. This does not grant rights to Third Space or Fisikal trademarks, services, or materials.
