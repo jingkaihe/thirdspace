@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"third-space-cli/internal/version"
+	"github.com/jingkaihe/thirdspace/internal/version"
 )
 
 func TestHelpUsesCobraCommandTree(t *testing.T) {

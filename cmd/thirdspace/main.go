@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"third-space-cli/internal/cli"
+	"github.com/jingkaihe/thirdspace/internal/cli"
 )
 
 func main() {

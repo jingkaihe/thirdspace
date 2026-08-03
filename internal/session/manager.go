@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"third-space-cli/internal/config"
-	"third-space-cli/internal/thirdspace"
+	"github.com/jingkaihe/thirdspace/internal/config"
+	"github.com/jingkaihe/thirdspace/internal/thirdspace"
 )
 
 // Refresh early enough that an occasionally used CLI is unlikely to let both

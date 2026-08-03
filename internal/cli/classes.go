@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"third-space-cli/internal/thirdspace"
+	"github.com/jingkaihe/thirdspace/internal/thirdspace"
 )
 
 func (a *app) newClubsCommand() *cobra.Command {

@@ -10,7 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"third-space-cli/internal/thirdspace"
+	"github.com/jingkaihe/thirdspace/internal/thirdspace"
 )
 
 func printClubs(output io.Writer, clubs []thirdspace.Club) error {

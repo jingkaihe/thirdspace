@@ -1,4 +1,4 @@
-module third-space-cli
+module github.com/jingkaihe/thirdspace
 
 go 1.26
 

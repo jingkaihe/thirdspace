@@ -114,3 +114,9 @@ The release workflow rejects a tag that does not match `v` followed by the versi
 - The CLI does not bypass Third Space booking windows, class capacity, waitlist rules, account restrictions, cancellation policies, or penalties; the server remains authoritative.
 - Automatic refresh requires the stored refresh token to remain valid. If both credentials expire, run `thirdspace login` again.
 - This project is based on an undocumented private API and is not affiliated with Third Space or Fisikal.
+
+## License
+
+The original source code in this repository is licensed under the MIT License. See `LICENSE`.
+
+The license applies only to this project's original source code. It does not grant or purport to grant rights to Third Space or Fisikal trademarks, services, APIs, applications, APKs, or decompiled materials.

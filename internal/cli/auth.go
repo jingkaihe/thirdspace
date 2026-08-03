@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"third-space-cli/internal/session"
+	"github.com/jingkaihe/thirdspace/internal/session"
 )
 
 func (a *app) newLoginCommand() *cobra.Command {

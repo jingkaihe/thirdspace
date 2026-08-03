@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"third-space-cli/internal/config"
+	"github.com/jingkaihe/thirdspace/internal/config"
 )
 
 func TestDefaultRefreshWindowIsThreeDays(t *testing.T) {

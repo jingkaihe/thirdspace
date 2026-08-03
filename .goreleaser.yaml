@@ -11,7 +11,7 @@ builds:
     flags:
       - -trimpath
     ldflags:
-      - "-s -w -X third-space-cli/internal/version.Version={{ .Version }} -X third-space-cli/internal/version.GitCommit={{ .Env.GIT_COMMIT }}"
+      - "-s -w -X github.com/jingkaihe/thirdspace/internal/version.Version={{ .Version }} -X github.com/jingkaihe/thirdspace/internal/version.GitCommit={{ .Env.GIT_COMMIT }}"
     goos:
       - darwin
       - linux

@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
-	"third-space-cli/internal/thirdspace"
+	"github.com/jingkaihe/thirdspace/internal/thirdspace"
 )
 
 func (a *app) newMutationCommand(name string) *cobra.Command {

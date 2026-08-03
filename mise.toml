@@ -45,7 +45,7 @@ run = "go vet ./..."
 description = "Build the Third Space CLI"
 run = [
   "mkdir -p bin",
-  "CGO_ENABLED=0 go build -trimpath -ldflags=\"-s -w -X third-space-cli/internal/version.Version=$VERSION -X third-space-cli/internal/version.GitCommit=$GIT_COMMIT\" -o ./bin/thirdspace ./cmd/thirdspace",
+  "CGO_ENABLED=0 go build -trimpath -ldflags=\"-s -w -X github.com/jingkaihe/thirdspace/internal/version.Version=$VERSION -X github.com/jingkaihe/thirdspace/internal/version.GitCommit=$GIT_COMMIT\" -o ./bin/thirdspace ./cmd/thirdspace",
 ]
 
 [tasks.ci]

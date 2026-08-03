@@ -7,10 +7,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"third-space-cli/internal/config"
-	"third-space-cli/internal/session"
-	"third-space-cli/internal/thirdspace"
-	"third-space-cli/internal/version"
+	"github.com/jingkaihe/thirdspace/internal/config"
+	"github.com/jingkaihe/thirdspace/internal/session"
+	"github.com/jingkaihe/thirdspace/internal/thirdspace"
+	"github.com/jingkaihe/thirdspace/internal/version"
 )
 
 type app struct {
