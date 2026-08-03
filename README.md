@@ -5,8 +5,10 @@ An unofficial Go CLI for browsing and booking Third Space classes. The API contr
 ## Build
 
 ```bash
-go build -o thirdspace .
+go build -o thirdspace ./cmd/thirdspace
 ```
+
+The executable lives under `cmd/thirdspace`; API, session, configuration, and Cobra command code is kept in focused packages under `internal/`.
 
 ## Authenticate
 
@@ -21,6 +23,14 @@ printf '%s\n' "$THIRDSPACE_PASSWORD" | ./thirdspace login --email "$THIRDSPACE_E
 ```
 
 The password is never stored. The resulting session token is written with mode `0600` under your user config directory, normally `~/.config/thirdspace/config.json` on Linux.
+
+Login also obtains a separate refresh token. Commands automatically exchange and rotate it when the session has 72 hours or less remaining, based on the roughly one-month lifetime observed in the Android app. You can rotate both tokens immediately with:
+
+```bash
+./thirdspace refresh
+```
+
+Use `./thirdspace status` to see token sources and expiry times. Token values are never displayed.
 
 ## Browse classes
 
@@ -73,9 +83,12 @@ For cancellation, the CLI derives `lateBooking` from the class action returned b
 | `THIRDSPACE_BASE_URL` | Override the API base URL; only the production API or a loopback test server is accepted |
 | `THIRDSPACE_CONFIG` | Override the config file path |
 
+All commands also accept a persistent `--config PATH` flag. Cobra provides command-specific help, for example `./thirdspace classes --help`.
+
 ## Safety and limitations
 
 - Booking, waitlisting, cancellation, and waitlist removal require a verified class action and terminal confirmation unless `--yes` is supplied.
+- Interactive mutations recheck the server action after confirmation, so a class changing from normal to late cancellation is not submitted under stale assumptions.
 - The CLI does not bypass Third Space booking windows, class capacity, waitlist rules, account restrictions, cancellation policies, or penalties; the server remains authoritative.
-- If the API returns `401 Unauthorized`, run `thirdspace login` again.
+- Automatic refresh requires the stored refresh token to remain valid. If both credentials expire, run `thirdspace login` again.
 - This project is based on an undocumented private API and is not affiliated with Third Space or Fisikal.

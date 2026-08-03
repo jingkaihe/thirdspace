@@ -1,0 +1,77 @@
+package cli
+
+import (
+	"context"
+	"io"
+	"os"
+
+	"github.com/spf13/cobra"
+
+	"third-space-cli/internal/config"
+	"third-space-cli/internal/session"
+	"third-space-cli/internal/thirdspace"
+)
+
+type app struct {
+	stdin      *os.File
+	stdout     io.Writer
+	stderr     io.Writer
+	configPath string
+}
+
+func Execute(ctx context.Context, args []string, stdin *os.File, stdout, stderr io.Writer) error {
+	command := NewCommand(stdin, stdout, stderr)
+	command.SetArgs(args)
+	return command.ExecuteContext(ctx)
+}
+
+func NewCommand(stdin *os.File, stdout, stderr io.Writer) *cobra.Command {
+	application := &app{stdin: stdin, stdout: stdout, stderr: stderr}
+	command := &cobra.Command{
+		Use:           "thirdspace",
+		Short:         "Browse and book Third Space classes",
+		SilenceErrors: true,
+		SilenceUsage:  true,
+		Args:          cobra.NoArgs,
+		RunE: func(command *cobra.Command, _ []string) error {
+			return command.Help()
+		},
+	}
+	command.SetIn(stdin)
+	command.SetOut(stdout)
+	command.SetErr(stderr)
+	command.CompletionOptions.DisableDefaultCmd = true
+	command.PersistentFlags().StringVar(&application.configPath, "config", "", "config file (default: $THIRDSPACE_CONFIG or the user config directory)")
+
+	command.AddCommand(
+		application.newLoginCommand(),
+		application.newLogoutCommand(),
+		application.newStatusCommand(),
+		application.newRefreshCommand(),
+		application.newClubsCommand(),
+		application.newClassesCommand(),
+		application.newClassCommand(),
+		application.newBookingsCommand(),
+		application.newMutationCommand("book"),
+		application.newMutationCommand("waitlist"),
+		application.newMutationCommand("cancel"),
+		application.newMutationCommand("leave-waitlist"),
+	)
+	return command
+}
+
+func (a *app) openStore() (*config.Store, error) {
+	path, err := config.ResolvePath(a.configPath)
+	if err != nil {
+		return nil, err
+	}
+	return config.Open(path, thirdspace.DefaultBaseURL)
+}
+
+func (a *app) authenticatedClient(ctx context.Context) (*thirdspace.Client, error) {
+	store, err := a.openStore()
+	if err != nil {
+		return nil, err
+	}
+	return session.NewManager(store).Client(ctx)
+}
