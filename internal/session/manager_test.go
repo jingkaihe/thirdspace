@@ -60,6 +60,9 @@ func TestLoginPersistsSessionAndRefreshWithoutPassword(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if err := store.Save(config.File{BaseURL: server.URL, DefaultClubIDs: []string{"1", "2"}}); err != nil {
+		t.Fatal(err)
+	}
 	result, err := NewManager(store).Login(context.Background(), "member@example.com", "login-password")
 	if err != nil {
 		t.Fatal(err)
@@ -70,6 +73,9 @@ func TestLoginPersistsSessionAndRefreshWithoutPassword(t *testing.T) {
 	state := store.State()
 	if state.Session.Value != "session-token" || state.Refresh.Value != "refresh-token" {
 		t.Fatalf("unexpected stored state: %#v", state)
+	}
+	if len(state.DefaultClubIDs) != 2 || state.DefaultClubIDs[0] != "1" || state.DefaultClubIDs[1] != "2" {
+		t.Fatalf("login did not preserve default clubs: %#v", state.DefaultClubIDs)
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -127,6 +133,7 @@ func TestClientProactivelyExchangesAndRotatesTokens(t *testing.T) {
 		ExpiresAt:             now.Add(48 * time.Hour).Format(time.RFC3339),
 		RefreshToken:          "old-refresh",
 		RefreshTokenExpiresAt: now.Add(10 * 24 * time.Hour).Format(time.RFC3339),
+		DefaultClubIDs:        []string{"1", "2"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -148,6 +155,9 @@ func TestClientProactivelyExchangesAndRotatesTokens(t *testing.T) {
 	}
 	if state.Refresh.Value != "new-refresh" || state.Refresh.ExpiresAt != newRefreshExpiry {
 		t.Fatalf("refresh token was not rotated: %#v", state.Refresh)
+	}
+	if len(state.DefaultClubIDs) != 2 || state.DefaultClubIDs[0] != "1" || state.DefaultClubIDs[1] != "2" {
+		t.Fatalf("refresh did not preserve default clubs: %#v", state.DefaultClubIDs)
 	}
 }
 

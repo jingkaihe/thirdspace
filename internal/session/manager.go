@@ -47,10 +47,11 @@ func (m *Manager) Login(ctx context.Context, email, password string) (LoginResul
 	}
 	refresh, refreshErr := client.IssueRefreshToken(ctx, session.Token)
 	file := config.File{
-		BaseURL:   state.BaseURL,
-		Email:     email,
-		Token:     session.Token,
-		ExpiresAt: session.ExpiresAt,
+		BaseURL:        state.BaseURL,
+		Email:          email,
+		Token:          session.Token,
+		ExpiresAt:      session.ExpiresAt,
+		DefaultClubIDs: append([]string(nil), state.DefaultClubIDs...),
 	}
 	if refreshErr == nil {
 		file.RefreshToken = refresh.Token
@@ -148,10 +149,11 @@ func (m *Manager) refresh(ctx context.Context, state config.State) (*thirdspace.
 		email = state.Email
 	}
 	file := config.File{
-		BaseURL:   baseURL,
-		Email:     email,
-		Token:     session.Token,
-		ExpiresAt: session.ExpiresAt,
+		BaseURL:        baseURL,
+		Email:          email,
+		Token:          session.Token,
+		ExpiresAt:      session.ExpiresAt,
+		DefaultClubIDs: append([]string(nil), state.DefaultClubIDs...),
 	}
 	if refreshErr == nil {
 		file.RefreshToken = refresh.Token

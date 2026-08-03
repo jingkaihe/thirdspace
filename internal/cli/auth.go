@@ -65,7 +65,7 @@ func (a *app) newLogoutCommand() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			if err := store.Clear(); err != nil {
+			if err := store.ClearCredentials(); err != nil {
 				return err
 			}
 			fmt.Fprintln(a.stdout, "Stored Third Space session removed.")

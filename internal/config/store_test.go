@@ -21,6 +21,7 @@ func TestStoreSavesPrivateConfigAndReloadsState(t *testing.T) {
 		ExpiresAt:             "2026-09-02T12:00:00",
 		RefreshToken:          "refresh",
 		RefreshTokenExpiresAt: "2026-09-02T12:00:00",
+		DefaultClubIDs:        []string{"1", "2"},
 	}
 	if err := store.Save(want); err != nil {
 		t.Fatal(err)
@@ -36,11 +37,48 @@ func TestStoreSavesPrivateConfigAndReloadsState(t *testing.T) {
 	if state.Session.Value != want.Token || state.Refresh.Value != want.RefreshToken || state.Email != want.Email {
 		t.Fatalf("state was not reloaded after save: %#v", state)
 	}
+	if len(state.DefaultClubIDs) != 2 || state.DefaultClubIDs[0] != "1" || state.DefaultClubIDs[1] != "2" {
+		t.Fatalf("default clubs were not reloaded after save: %#v", state.DefaultClubIDs)
+	}
 	if err := store.Clear(); err != nil {
 		t.Fatal(err)
 	}
 	if state := store.State(); state.Session.Value != "" || state.Refresh.Value != "" {
 		t.Fatalf("state was not cleared: %#v", state)
+	}
+}
+
+func TestClubPreferencesSurviveCredentialChanges(t *testing.T) {
+	clearEnvironment(t)
+	path := filepath.Join(t.TempDir(), "config.json")
+	store, err := Open(path, "https://api.thirdspace-london.app")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := store.Save(File{
+		BaseURL:      "https://api.thirdspace-london.app",
+		Email:        "member@example.com",
+		Token:        "session",
+		RefreshToken: "refresh",
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if err := store.SetDefaultClubIDs([]string{"3", "4"}); err != nil {
+		t.Fatal(err)
+	}
+	state := store.State()
+	if state.Session.Value != "session" || state.Refresh.Value != "refresh" {
+		t.Fatalf("setting clubs changed credentials: %#v", state)
+	}
+	if err := store.ClearCredentials(); err != nil {
+		t.Fatal(err)
+	}
+	state = store.State()
+	if state.Session.Value != "" || state.Refresh.Value != "" || state.Email != "" {
+		t.Fatalf("credentials were not cleared: %#v", state)
+	}
+	if len(state.DefaultClubIDs) != 2 || state.DefaultClubIDs[0] != "3" || state.DefaultClubIDs[1] != "4" {
+		t.Fatalf("default clubs were not preserved: %#v", state.DefaultClubIDs)
 	}
 }
 

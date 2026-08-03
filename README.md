@@ -40,7 +40,15 @@ List club IDs:
 ./thirdspace clubs
 ```
 
-List today's classes in all clubs:
+Choose the clubs used by default for class searches:
+
+```bash
+./thirdspace club choose 1,2
+./thirdspace club show
+./thirdspace club clear
+```
+
+List today's classes in the saved default clubs, or all clubs when no defaults are selected:
 
 ```bash
 ./thirdspace classes
@@ -52,7 +60,43 @@ Search a seven-day window for Yoga classes at selected clubs:
 ./thirdspace classes --date 2026-08-04 --days 7 --club 1,2 --name yoga
 ```
 
+An explicit `--club` overrides the saved defaults for one search. Use `--club all` to search every club without clearing the saved selection.
+
 Dates are interpreted in the `Europe/London` timezone. Add `--json` to `clubs`, `classes`, `class`, or `bookings` for machine-readable output.
+
+## Interactive TUI
+
+Launch the full-screen terminal interface with:
+
+```bash
+./thirdspace tui
+```
+
+The TUI uses the saved credentials when available and otherwise presents a password-masked login form. Its timetable starts with the same default clubs managed by `thirdspace club choose`. Changing clubs with `c` updates that shared saved preference, so later CLI and TUI searches use the same selection.
+
+Class filters are combined using AND semantics:
+
+1. The selected clubs scope the timetable request sent to the API and locally constrain the Bookings tab.
+2. The class-name field is applied when non-empty.
+3. The trainer field is applied when non-empty.
+
+For example, selecting City and Soho, then filtering for class `yoga` and trainer `alex`, shows only Alex's Yoga classes at those two clubs. Press `/` to edit the separate class and trainer fields.
+
+| Key | Action |
+| --- | --- |
+| `j` / `k`, arrows | Move through classes |
+| `[` / `]` | Previous or next timetable window; change booking range on the Bookings tab |
+| `w` | Toggle a one-day or seven-day timetable |
+| `Tab` | Switch between Timetable and Bookings |
+| `/` | Set combined class and trainer filters |
+| `c` | Choose and persist default timetable clubs |
+| `Enter` | Open full class details |
+| `a` | Use the current server-provided class action |
+| `r` | Refresh the current data |
+| `?` | Show expanded help |
+| `q` | Quit |
+
+The interface automatically selects Catppuccin Latte for terminals reporting a light background and Catppuccin Mocha for terminals reporting a dark background. It adapts columns and the detail pane to the available terminal size.
 
 ## Book and manage classes
 
@@ -87,8 +131,8 @@ All commands also accept a persistent `--config PATH` flag. Cobra provides comma
 
 ## Safety and limitations
 
-- Booking, waitlisting, cancellation, and waitlist removal require a verified class action and terminal confirmation unless `--yes` is supplied.
-- Interactive mutations recheck the server action after confirmation, so a class changing from normal to late cancellation is not submitted under stale assumptions.
+- Booking, waitlisting, cancellation, and waitlist removal require a verified server-provided class action and terminal confirmation unless `--yes` is supplied.
+- Every mutation rechecks the server action immediately before submission, including `--yes` commands and confirmed TUI actions. A class changing from normal to late cancellation is not submitted under stale assumptions.
 - The CLI does not bypass Third Space booking windows, class capacity, waitlist rules, account restrictions, cancellation policies, or penalties; the server remains authoritative.
 - Automatic refresh requires the stored refresh token to remain valid. If both credentials expire, run `thirdspace login` again.
 - This project is based on an undocumented private API and is not affiliated with Third Space or Fisikal.

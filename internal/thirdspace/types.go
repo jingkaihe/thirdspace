@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -191,4 +192,37 @@ func ParseTimestamp(value string) (time.Time, error) {
 		}
 	}
 	return time.Time{}, fmt.Errorf("unsupported timestamp %q", value)
+}
+
+func SortClubs(clubs []Club) {
+	sort.SliceStable(clubs, func(left, right int) bool {
+		return strings.ToLower(clubs[left].Name) < strings.ToLower(clubs[right].Name)
+	})
+}
+
+func FilterClasses(classes []Class, name, trainer string) []Class {
+	name = strings.ToLower(strings.TrimSpace(name))
+	trainer = strings.ToLower(strings.TrimSpace(trainer))
+	filtered := make([]Class, 0, len(classes))
+	for _, class := range classes {
+		if name != "" && !strings.Contains(strings.ToLower(class.Name), name) {
+			continue
+		}
+		if trainer != "" && !strings.Contains(strings.ToLower(class.TrainerName), trainer) {
+			continue
+		}
+		filtered = append(filtered, class)
+	}
+	return filtered
+}
+
+func SortClasses(classes []Class) {
+	sort.SliceStable(classes, func(left, right int) bool {
+		leftDate, leftErr := ParseTimestamp(classes[left].StartDate)
+		rightDate, rightErr := ParseTimestamp(classes[right].StartDate)
+		if leftErr == nil && rightErr == nil {
+			return leftDate.Before(rightDate)
+		}
+		return classes[left].StartDate < classes[right].StartDate
+	})
 }

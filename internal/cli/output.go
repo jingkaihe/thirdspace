@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"sort"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -13,11 +12,19 @@ import (
 	"github.com/jingkaihe/thirdspace/internal/thirdspace"
 )
 
-func printClubs(output io.Writer, clubs []thirdspace.Club) error {
+func printClubs(output io.Writer, clubs []thirdspace.Club, defaultIDs []string) error {
+	defaults := make(map[string]struct{}, len(defaultIDs))
+	for _, id := range defaultIDs {
+		defaults[id] = struct{}{}
+	}
 	table := tabwriter.NewWriter(output, 0, 4, 2, ' ', 0)
-	fmt.Fprintln(table, "ID\tNAME\tCODE")
+	fmt.Fprintln(table, "ID\tNAME\tCODE\tDEFAULT")
 	for _, club := range clubs {
-		fmt.Fprintf(table, "%s\t%s\t%s\n", club.ID, club.Name, emptyDash(club.Code))
+		selected := "-"
+		if _, exists := defaults[string(club.ID)]; exists {
+			selected = "yes"
+		}
+		fmt.Fprintf(table, "%s\t%s\t%s\t%s\n", club.ID, club.Name, emptyDash(club.Code), selected)
 	}
 	return table.Flush()
 }
@@ -57,30 +64,11 @@ func printClassDetail(output io.Writer, class thirdspace.Class) {
 }
 
 func filterClasses(classes []thirdspace.Class, name, trainer string) []thirdspace.Class {
-	name = strings.ToLower(strings.TrimSpace(name))
-	trainer = strings.ToLower(strings.TrimSpace(trainer))
-	filtered := make([]thirdspace.Class, 0, len(classes))
-	for _, class := range classes {
-		if name != "" && !strings.Contains(strings.ToLower(class.Name), name) {
-			continue
-		}
-		if trainer != "" && !strings.Contains(strings.ToLower(class.TrainerName), trainer) {
-			continue
-		}
-		filtered = append(filtered, class)
-	}
-	return filtered
+	return thirdspace.FilterClasses(classes, name, trainer)
 }
 
 func sortClasses(classes []thirdspace.Class) {
-	sort.SliceStable(classes, func(left, right int) bool {
-		leftDate, leftErr := thirdspace.ParseTimestamp(classes[left].StartDate)
-		rightDate, rightErr := thirdspace.ParseTimestamp(classes[right].StartDate)
-		if leftErr == nil && rightErr == nil {
-			return leftDate.Before(rightDate)
-		}
-		return classes[left].StartDate < classes[right].StartDate
-	})
+	thirdspace.SortClasses(classes)
 }
 
 func formatClassDate(value string) string {

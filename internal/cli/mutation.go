@@ -2,7 +2,6 @@ package cli
 
 import (
 	"bufio"
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 
+	"github.com/jingkaihe/thirdspace/internal/classaction"
 	"github.com/jingkaihe/thirdspace/internal/thirdspace"
 )
 
@@ -29,19 +29,16 @@ func (a *app) newMutationCommand(name string) *cobra.Command {
 				return err
 			}
 
-			detail, err := client.ClassDetail(command.Context(), id)
-			if err != nil {
-				return fmt.Errorf("could not verify class %s before making a change: %w", id, err)
-			}
-			late, err := validateMutationAction(name, detail.EventAction)
+			plan, err := classaction.Prepare(command.Context(), client, classaction.Kind(name), id)
 			if err != nil {
 				return err
 			}
-			printClassDetail(a.stderr, detail)
-			if late {
+			printClassDetail(a.stderr, plan.Class)
+			if plan.Late {
 				fmt.Fprintln(a.stderr, "warning: the app marks this as a late cancellation and a penalty may apply")
 			}
 
+			var result json.RawMessage
 			if !yes {
 				if !term.IsTerminal(int(a.stdin.Fd())) {
 					return fmt.Errorf("interactive confirmation requires a terminal; inspect the class and rerun with --yes for non-interactive use")
@@ -54,22 +51,8 @@ func (a *app) newMutationCommand(name string) *cobra.Command {
 					fmt.Fprintln(a.stdout, "No changes made.")
 					return nil
 				}
-
-				current, err := client.ClassDetail(command.Context(), id)
-				if err != nil {
-					return fmt.Errorf("could not recheck class %s after confirmation; no change was made: %w", id, err)
-				}
-				currentLate, err := validateMutationAction(name, current.EventAction)
-				if err != nil {
-					return fmt.Errorf("class state changed after confirmation; no change was made: %w", err)
-				}
-				if current.EventAction != detail.EventAction {
-					return fmt.Errorf("class action changed from %q to %q while awaiting confirmation; no change was made; rerun the command", detail.EventAction, current.EventAction)
-				}
-				late = currentLate
 			}
-
-			result, err := applyMutation(command.Context(), client, name, id, late)
+			result, err = classaction.RecheckAndApply(command.Context(), client, plan)
 			if err != nil {
 				return err
 			}
@@ -84,44 +67,8 @@ func (a *app) newMutationCommand(name string) *cobra.Command {
 	return command
 }
 
-func applyMutation(ctx context.Context, client *thirdspace.Client, command string, id thirdspace.ID, late bool) (json.RawMessage, error) {
-	switch command {
-	case "book":
-		return client.BookClass(ctx, id)
-	case "waitlist":
-		return client.JoinWaitlist(ctx, id)
-	case "cancel":
-		return client.CancelBooking(ctx, id, late)
-	case "leave-waitlist":
-		return client.LeaveWaitlist(ctx, id)
-	default:
-		return nil, fmt.Errorf("unknown mutation command %q", command)
-	}
-}
-
 func validateMutationAction(command, action string) (bool, error) {
-	var allowed []string
-	switch command {
-	case "book":
-		allowed = []string{"join"}
-	case "waitlist":
-		allowed = []string{"wait"}
-	case "cancel":
-		allowed = []string{"cancel", "late_cancel"}
-	case "leave-waitlist":
-		allowed = []string{"leave"}
-	default:
-		return false, fmt.Errorf("unknown mutation command %q", command)
-	}
-	for _, expected := range allowed {
-		if action == expected {
-			return action == "late_cancel", nil
-		}
-	}
-	if action == "" {
-		action = "unknown"
-	}
-	return false, fmt.Errorf("cannot run %q: the server reports class action %q", command, action)
+	return classaction.Validate(classaction.Kind(command), action)
 }
 
 func mutationDescription(command string) string {

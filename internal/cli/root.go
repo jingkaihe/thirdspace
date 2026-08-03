@@ -46,10 +46,12 @@ func NewCommand(stdin *os.File, stdout, stderr io.Writer) *cobra.Command {
 	command.PersistentFlags().StringVar(&application.configPath, "config", "", "config file (default: $THIRDSPACE_CONFIG or the user config directory)")
 
 	command.AddCommand(
+		application.newTUICommand(),
 		application.newLoginCommand(),
 		application.newLogoutCommand(),
 		application.newStatusCommand(),
 		application.newRefreshCommand(),
+		application.newClubCommand(),
 		application.newClubsCommand(),
 		application.newClassesCommand(),
 		application.newClassCommand(),
@@ -71,9 +73,18 @@ func (a *app) openStore() (*config.Store, error) {
 }
 
 func (a *app) authenticatedClient(ctx context.Context) (*thirdspace.Client, error) {
+	_, client, err := a.authenticated(ctx)
+	return client, err
+}
+
+func (a *app) authenticated(ctx context.Context) (*config.Store, *thirdspace.Client, error) {
 	store, err := a.openStore()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return session.NewManager(store).Client(ctx)
+	client, err := session.NewManager(store).Client(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	return store, client, nil
 }

@@ -5,6 +5,8 @@
 - Go module: `github.com/jingkaihe/thirdspace`
 - CLI entry point: `cmd/thirdspace`
 - Cobra commands and terminal output: `internal/cli`
+- Bubble Tea terminal interface: `internal/tui`
+- Shared class-action validation and recheck lifecycle: `internal/classaction`
 - API client and API-facing types: `internal/thirdspace`
 - Session login and refresh lifecycle: `internal/session`
 - Secure configuration persistence: `internal/config`

@@ -55,3 +55,15 @@ func TestBuildClassDateRangePreservesSecondDSTFold(t *testing.T) {
 		t.Fatalf("start = %s, want second-fold instant 2027-10-31T01:31:00", start)
 	}
 }
+
+func TestFilterClassesCombinesNameAndTrainer(t *testing.T) {
+	classes := []Class{
+		{ID: "1", Name: "Yoga Flow", TrainerName: "Alex"},
+		{ID: "2", Name: "Yoga Flow", TrainerName: "Sam"},
+		{ID: "3", Name: "HIIT", TrainerName: "Alex"},
+	}
+	filtered := FilterClasses(classes, "yoga", "alex")
+	if len(filtered) != 1 || filtered[0].ID != "1" {
+		t.Fatalf("filtered classes = %#v", filtered)
+	}
+}

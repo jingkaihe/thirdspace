@@ -11,12 +11,13 @@ import (
 )
 
 type File struct {
-	BaseURL               string `json:"baseUrl,omitempty"`
-	Email                 string `json:"email,omitempty"`
-	Token                 string `json:"token,omitempty"`
-	ExpiresAt             string `json:"expiresAt,omitempty"`
-	RefreshToken          string `json:"refreshToken,omitempty"`
-	RefreshTokenExpiresAt string `json:"refreshTokenExpiresAt,omitempty"`
+	BaseURL               string   `json:"baseUrl,omitempty"`
+	Email                 string   `json:"email,omitempty"`
+	Token                 string   `json:"token,omitempty"`
+	ExpiresAt             string   `json:"expiresAt,omitempty"`
+	RefreshToken          string   `json:"refreshToken,omitempty"`
+	RefreshTokenExpiresAt string   `json:"refreshTokenExpiresAt,omitempty"`
+	DefaultClubIDs        []string `json:"defaultClubIds,omitempty"`
 }
 
 type Token struct {
@@ -30,6 +31,7 @@ type State struct {
 	Password               string
 	Session                Token
 	Refresh                Token
+	DefaultClubIDs         []string
 	SessionFromEnvironment bool
 	EmailFromEnvironment   bool
 }
@@ -131,9 +133,30 @@ func (s *Store) State() State {
 		Password:               os.Getenv("THIRDSPACE_PASSWORD"),
 		Session:                Token{Value: s.viper.GetString("token"), ExpiresAt: sessionExpiry},
 		Refresh:                Token{Value: s.viper.GetString("refreshToken"), ExpiresAt: s.viper.GetString("refreshTokenExpiresAt")},
+		DefaultClubIDs:         append([]string(nil), s.stored.DefaultClubIDs...),
 		SessionFromEnvironment: sessionFromEnvironment,
 		EmailFromEnvironment:   emailFromEnvironment,
 	}
+}
+
+func (s *Store) SetDefaultClubIDs(ids []string) error {
+	file := s.stored
+	if file.BaseURL == "" {
+		file.BaseURL = s.State().BaseURL
+	}
+	file.DefaultClubIDs = append([]string(nil), ids...)
+	return s.Save(file)
+}
+
+func (s *Store) ClearCredentials() error {
+	file := File{
+		BaseURL:        s.stored.BaseURL,
+		DefaultClubIDs: append([]string(nil), s.stored.DefaultClubIDs...),
+	}
+	if file.BaseURL == "" && len(file.DefaultClubIDs) == 0 {
+		return s.Clear()
+	}
+	return s.Save(file)
 }
 
 func (s *Store) Save(file File) error {
