@@ -1,0 +1,10 @@
+# Credentials and local session data
+thirdspce-login.txt
+
+# Local binary
+/thirdspace
+
+# APKs, extracted sources, and reverse-engineering artifacts
+/apk/
+*.apk
+*.xapk
