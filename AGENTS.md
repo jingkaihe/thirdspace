@@ -60,7 +60,7 @@ Releases currently contain `tar.gz` archives and checksums for:
 
 ## Safety
 
-- Never commit `thirdspce-login.txt`, local configuration files, APKs, decompiled app material, `bin/`, or `dist/`.
+- Never commit credentials, local configuration files, APKs, decompiled app material, `bin/`, or `dist/`.
 - Do not exercise booking, waitlist, cancellation, or waitlist-removal API calls during automated or live validation. Use read-only commands for smoke tests.
 - Preserve the `0600` permissions used for stored credentials.
 - Treat the API as undocumented and server-authoritative; do not add behavior that attempts to bypass booking or cancellation rules.
