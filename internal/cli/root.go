@@ -10,6 +10,7 @@ import (
 	"third-space-cli/internal/config"
 	"third-space-cli/internal/session"
 	"third-space-cli/internal/thirdspace"
+	"third-space-cli/internal/version"
 )
 
 type app struct {
@@ -30,6 +31,7 @@ func NewCommand(stdin *os.File, stdout, stderr io.Writer) *cobra.Command {
 	command := &cobra.Command{
 		Use:           "thirdspace",
 		Short:         "Browse and book Third Space classes",
+		Version:       version.String(),
 		SilenceErrors: true,
 		SilenceUsage:  true,
 		Args:          cobra.NoArgs,

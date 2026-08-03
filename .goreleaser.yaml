@@ -1,0 +1,40 @@
+version: 2
+
+project_name: thirdspace
+
+builds:
+  - id: thirdspace
+    main: ./cmd/thirdspace
+    binary: thirdspace
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -trimpath
+    ldflags:
+      - "-s -w -X third-space-cli/internal/version.Version={{ .Version }} -X third-space-cli/internal/version.GitCommit={{ .Env.GIT_COMMIT }}"
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - ids:
+      - thirdspace
+    formats:
+      - tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ .Env.VERSION }}-SNAPSHOT"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"

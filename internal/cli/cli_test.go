@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"third-space-cli/internal/version"
 )
 
 func TestHelpUsesCobraCommandTree(t *testing.T) {
@@ -20,6 +22,18 @@ func TestHelpUsesCobraCommandTree(t *testing.T) {
 		if !strings.Contains(stdout.String(), command) {
 			t.Fatalf("help did not contain %q:\n%s", command, stdout.String())
 		}
+	}
+}
+
+func TestVersionFlag(t *testing.T) {
+	input := emptyInput(t)
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	if err := Execute(context.Background(), []string{"--version"}, input, &stdout, &stderr); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(stdout.String(), version.Version) || !strings.Contains(stdout.String(), version.GitCommit) {
+		t.Fatalf("version output did not contain %q: %s", version.String(), stdout.String())
 	}
 }
 

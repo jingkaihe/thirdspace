@@ -10,6 +10,18 @@ go build -o thirdspace ./cmd/thirdspace
 
 The executable lives under `cmd/thirdspace`; API, session, configuration, and Cobra command code is kept in focused packages under `internal/`.
 
+With Mise installed, the common development commands are:
+
+```bash
+mise install
+mise run version-check
+mise run build
+mise run test
+mise run ci
+```
+
+`VERSION.txt` is the single declared project version. Mise injects it and the current Git commit SHA into `bin/thirdspace`; both can be checked with `./bin/thirdspace --version`. Formal GoReleaser builds encode the full commit SHA for the tagged source. Use `mise run snapshot` to create local release archives under `dist/` without publishing them.
+
 ## Authenticate
 
 ```bash
@@ -84,6 +96,16 @@ For cancellation, the CLI derives `lateBooking` from the class action returned b
 | `THIRDSPACE_CONFIG` | Override the config file path |
 
 All commands also accept a persistent `--config PATH` flag. Cobra provides command-specific help, for example `./thirdspace classes --help`.
+
+## Releases
+
+GitHub Actions runs formatting, tests, vet, build, and GoReleaser configuration checks for pushes to `main` and for pull requests. Pushing a version tag publishes Linux and macOS archives for `amd64` and `arm64`, along with checksums, through GoReleaser:
+
+```bash
+mise run push-tag
+```
+
+The release workflow rejects a tag that does not match `v` followed by the version in `VERSION.txt`.
 
 ## Safety and limitations
 

@@ -3,6 +3,8 @@ thirdspce-login.txt
 
 # Local binary
 /thirdspace
+/bin/
+/dist/
 
 # APKs, extracted sources, and reverse-engineering artifacts
 /apk/

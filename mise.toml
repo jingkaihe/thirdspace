@@ -1,0 +1,79 @@
+[tools]
+go = "1.26.5"
+goreleaser = "2.17.1"
+
+[env]
+VERSION = "{{exec(command='cat VERSION.txt')}}"
+GIT_COMMIT = "{{exec(command='git rev-parse HEAD 2>/dev/null || echo unknown')}}"
+
+[tasks.version-check]
+description = "Validate VERSION.txt and an optional release tag"
+run = '''
+if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$'; then
+  echo "VERSION.txt must contain a semantic version without a leading v"
+  exit 1
+fi
+if [ -n "${RELEASE_TAG:-}" ] && [ "$RELEASE_TAG" != "v$VERSION" ]; then
+  echo "release tag $RELEASE_TAG does not match VERSION.txt (expected v$VERSION)"
+  exit 1
+fi
+'''
+
+[tasks.format]
+description = "Format Go source files"
+run = "git ls-files --cached --others --exclude-standard -- '*.go' | xargs gofmt -w"
+
+[tasks.format-check]
+description = "Check Go source formatting"
+run = '''
+files="$(git ls-files --cached --others --exclude-standard -- '*.go' | xargs gofmt -l)"
+if [ -n "$files" ]; then
+  printf 'The following files need formatting:\n%s\n' "$files"
+  exit 1
+fi
+'''
+
+[tasks.test]
+description = "Run Go tests with the race detector"
+run = "go test -race ./..."
+
+[tasks.vet]
+description = "Run go vet"
+run = "go vet ./..."
+
+[tasks.build]
+description = "Build the Third Space CLI"
+run = [
+  "mkdir -p bin",
+  "CGO_ENABLED=0 go build -trimpath -ldflags=\"-s -w -X third-space-cli/internal/version.Version=$VERSION -X third-space-cli/internal/version.GitCommit=$GIT_COMMIT\" -o ./bin/thirdspace ./cmd/thirdspace",
+]
+
+[tasks.ci]
+description = "Run formatting, tests, vet, and build checks"
+depends = ["version-check", "format-check", "test", "vet", "build"]
+
+[tasks.release-check]
+description = "Validate the GoReleaser configuration"
+run = "goreleaser check"
+
+[tasks.snapshot]
+description = "Build local release artifacts without publishing"
+depends = ["version-check"]
+run = "goreleaser release --snapshot --clean"
+
+[tasks.release]
+description = "Publish the current tag with GoReleaser"
+depends = ["version-check"]
+run = "goreleaser release --clean"
+
+[tasks.push-tag]
+description = "Create and push the version tag from VERSION.txt"
+depends = ["version-check"]
+run = [
+  "git tag -a \"v$VERSION\" -m \"v$VERSION\"",
+  "git push origin \"v$VERSION\"",
+]
+
+[tasks.clean]
+description = "Remove local build and release artifacts"
+run = "rm -rf bin dist"
