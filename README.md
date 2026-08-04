@@ -2,6 +2,39 @@
 
 An unofficial, unaffiliated Go CLI and TUI for browsing and booking Third Space classes. It uses an undocumented API that may change.
 
+## Install
+
+### Homebrew
+
+```bash
+brew install jingkaihe/essentials/thirdspace
+```
+
+### Mise
+
+```bash
+mise use -g github:jingkaihe/thirdspace
+```
+
+<details>
+<summary><strong>GitHub release</strong></summary>
+
+Download the latest macOS or Linux archive with `curl`:
+
+```bash
+VERSION="$(curl -qfsSL https://api.github.com/repos/jingkaihe/thirdspace/releases/latest | awk -F'"' '/tag_name/{sub(/^v/, "", $4); print $4}')"
+OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+ARCH="$(uname -m | sed 's/x86_64/amd64/; s/aarch64/arm64/')"
+curl -qfLO "https://github.com/jingkaihe/thirdspace/releases/download/v${VERSION}/thirdspace_${VERSION}_${OS}_${ARCH}.tar.gz"
+tar -xzf "thirdspace_${VERSION}_${OS}_${ARCH}.tar.gz"
+mkdir -p "$HOME/.local/bin"
+install -m 0755 thirdspace "$HOME/.local/bin/thirdspace"
+```
+
+Ensure `~/.local/bin` is in `PATH`. On macOS, downloading this way from a normal Terminal session does not usually add the quarantine attribute. For a system-wide installation, use `sudo install -m 0755 thirdspace /usr/local/bin/thirdspace` instead.
+
+</details>
+
 ## Build from source
 
 ```bash
