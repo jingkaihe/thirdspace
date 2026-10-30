@@ -1,6 +1,6 @@
 module github.com/jingkaihe/thirdspace
 
-go 1.26
+go 1.27.3
 
 require (
 	charm.land/bubbles/v2 v2.1.1
